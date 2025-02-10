@@ -40,8 +40,8 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	query := `INSERT INTO users (name, email) VALUES ($1, $2) RETURNING id`
-	err := database.DB.QueryRow(query, user.Name, user.Email).Scan(&user.ID)
+	query := `INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id`
+	err := database.DB.QueryRow(query, user.Name, user.Email, user.Password, user.Role).Scan(&user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -55,8 +55,8 @@ func GetUserByID(c *gin.Context) {
 	id := c.Param("id")
 	var user models.User
 
-	query := `SELECT id, name, email FROM users WHERE id=$1`
-	err := database.DB.QueryRow(query, id).Scan(&user.ID, &user.Name, &user.Email)
+	query := `SELECT id, name, email, password, role FROM users WHERE id=$1`
+	err := database.DB.QueryRow(query, id).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.Role)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, gin.H{"message": "User tidak ditemukan"})
@@ -79,8 +79,8 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	query := `UPDATE users SET name=$1, email=$2 WHERE id=$3`
-	_, err := database.DB.Exec(query, user.Name, user.Email, id)
+	query := `UPDATE users SET name=$1, email=$2, password=$3 WHERE id=$4`
+	_, err := database.DB.Exec(query, user.Name, user.Email, user.Password, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
